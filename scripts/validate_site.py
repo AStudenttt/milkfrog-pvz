@@ -13,6 +13,7 @@ for name,m in manifest.items():
  assert h>=m['h']*((m['frames']+m['cols']-1)//m['cols']),name
  assert len(m.get('durations',[])) in (0,m['frames']),name
 for path in re.findall(r'(?:src|href)="([^"#]+)"',(d/'index.html').read_text()):
+ path=path.split('?')[0]
  if path.startswith(('https:','http:','data:')) or path in ('game-offline.html','game-source.zip'):continue
  assert not path.startswith('/'),f'Absolute URL breaks project Pages: {path}'
  assert (d/path).is_file(),f'Missing linked file: {path}'

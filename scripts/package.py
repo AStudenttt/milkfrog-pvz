@@ -1,6 +1,7 @@
 from pathlib import Path
-import base64,json,mimetypes,re,zipfile
+import base64,json,mimetypes,re,zipfile,runpy
 root=Path(__file__).resolve().parents[1];d=root/'dist'
+runpy.run_path(str(root/'scripts/version_assets.py'))
 urls={}
 for p in (d/'assets').rglob('*'):
  if p.is_file() and p.suffix!='.json':
@@ -8,13 +9,13 @@ for p in (d/'assets').rglob('*'):
   urls[str(p.relative_to(d/'assets'))]='data:'+mime+';base64,'+base64.b64encode(p.read_bytes()).decode()
 html=(d/'index.html').read_text()
 css=re.sub(r"url\(['\"]?assets/([^)'\"]+)['\"]?\)",lambda m:'url(\"'+urls[m[1]]+'\")',(d/'style.css').read_text())
-html=html.replace('<link rel="stylesheet" href="style.css">','<style>'+css+'</style>')
+html=re.sub(r'<link rel="stylesheet" href="style\.css(?:\?[^"]*)?">',lambda m:'<style>'+css+'</style>',html)
 html=re.sub(r'src="assets/([^"]+)"',lambda m:'src="'+urls.get(m[1],'')+'"',html)
 manifest=json.loads((d/'assets/manifest.json').read_text())
 setup='<script>window.__ASSET_URLS__='+json.dumps(urls)+';window.__ASSET_MANIFEST__='+json.dumps(manifest)+';</script>'
-html=html.replace('<script src="js/engine.js"></script>',setup+'<script src="js/engine.js"></script>')
+html=re.sub(r'(?=<script src="js/engine\.js(?:\?[^"]*)?"></script>)',lambda m:setup,html,count=1)
 for name in ['engine','ui','renderer','app']:
- html=html.replace(f'<script src="js/{name}.js"></script>','<script>'+(d/f'js/{name}.js').read_text()+'</script>')
+ html=re.sub(r'<script src="js/'+name+r'\.js(?:\?[^"]*)?"></script>',lambda m:'<script>'+(d/f'js/{name}.js').read_text()+'</script>',html)
 html=re.sub(r'<footer>.*?</footer>','',html,flags=re.S)
 (d/'game-offline.html').write_text(html)
 with zipfile.ZipFile(d/'game-source.zip','w',zipfile.ZIP_DEFLATED) as z:
