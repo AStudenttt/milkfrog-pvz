@@ -18,3 +18,8 @@ for path in re.findall(r'(?:src|href)="([^"#]+)"',(d/'index.html').read_text()):
  assert (d/path).is_file(),f'Missing linked file: {path}'
 assert not (root/'.openai').exists(),'Do not export Sites account configuration'
 print(f'PASS {len(manifest)} animation atlases, local links and project-URL compatibility')
+
+for path in re.findall(r"url\(['\"]?([^)'\"]+)['\"]?\)",(d/'style.css').read_text()):
+ if not path.startswith(('data:','https:','http:')):
+  assert (d/path).is_file(),f'Missing CSS bitmap: {path}'
+print('PASS all original UI textures referenced by CSS')

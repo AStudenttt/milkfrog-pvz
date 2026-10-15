@@ -46,3 +46,10 @@
 - 仅重新导入原始 GIF 素材时需要 Pillow：`python3 scripts/prepare_assets.py --input 原素材目录`；正常开发、运行和部署均不需要它。
 - 可选 Canvas 渲染检查依赖 `@napi-rs/canvas`，不是运行或 Pages 部署依赖。
 - 未来奶蛙素材替换应集中调整 `dist/assets/manifest.json` 与素材对应项，不改动网格坐标。
+
+## 经典 UI 与启动动画
+
+- 启动加载页、墓碑主菜单、选关、图鉴、选项和战斗 HUD 使用 `dist/assets/ui/` 中的原版位图资源。
+- 进入关卡后，草皮卷从左向右铺开，再播放准备 / 安放 / 开始提示；动画期间战斗时钟、阳光与波次不推进，可点击跳过或按 Esc。
+- `dist/js/ui.js` 维护界面素材清单和纯渲染过场；`tests/intro.test.js` 校验展开方向和时钟隔离，`tests/render-intro.js` 输出单行与五行铺草检查图。
+- 首页的关卡入口只显示已实现的白天关卡，无尽模式入口保留。
